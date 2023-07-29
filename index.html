@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>DPDA</title>
+</head>
+<body>
+    <div id="machineOutput"><h1 class="title">OUTPUT HERE</h1></div>
+    
+    <div class="inputs">
+        <div class="formatDesc">
+            <h3 class="title">Machine Input Format</h3>
+            <p>The machine definition follows the format below per line of text:</p>
+            <ol>
+                <li>number of states</li>
+                <li>list of states</li>
+                <li>number of inputs</li>
+                <li>list of inputs</li>
+                <li>number of transitions</li>
+                <li>transitions in the format <em>q s pop q' push</em> such that <br> δ(q, s, pop) = {(q', push)} </li>
+                <li>start state</li>
+                <li>number of final states</li>
+                <li>list of final states</li>
+            </ol>
+        </div>
+        <div class="read">
+            <label for="machineInput"><h3 class="title">Input Machine Description</h3></label>
+            <textarea name="machineDesc" id="machineInput"></textarea>
+            <p class="validation">Machine Accepted.</p>
+            <div class="buttons">
+                <button id="inputFileBtn">IMPORT</button>
+                <button id="readMachine">READ</button>
+            </div>
+            <input type="file" id="inputFile" style="display: none;" accept=".txt">
+        </div>
+        <div class="control">
+            <label for="inputString"><h3 class="title">Input String</h3></label>
+            <input type="text" id="inputString">
+
+            <h3 class="title">Control</h3>
+            <input type="range" name="range" id="speedInput">
+            <div class="buttons-1">  
+                <button id="runInput" disabled>RUN</button>
+                <button id="pause" disabled>PAUSE</button>
+            </div>
+            <div class="buttons-2">
+                <button id="backward" disabled><<</button>
+                <button id="forward" disabled>>></button>
+                <button id="reset" disabled>RESET</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="error-cover"></div>
+    <div class="error-details">
+        <h1>ERROR: Check machine input format!!!</h1>
+        <p id="errorDetails"></p>
+    </div>
+    <!-- JQUERY IMPORT -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script type="module" src="index.js"></script>
+</body>
+</html>
