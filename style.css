@@ -13,11 +13,15 @@
 }
 
 body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-color: var(--primary-color);
     font-family: var(--def-font);
     color: var(--secondary-color);
     min-width: 480px;
-    padding: 100px;
+    padding: 0 100px;
+    min-height: 100vh;
 }
 
 button{
@@ -83,7 +87,6 @@ button:disabled{
 .inputs{
     display: grid;
     grid-template-columns: 1.2fr 0.9fr 0.9fr;
-    align-items: center;
     justify-content: center;
 }
 
@@ -124,4 +127,48 @@ button:disabled{
     opacity: 0;
     transition: 0.2s opacity;
     z-index: -1;
+}
+
+/** GUI **/
+.gui{
+    height: 150px;
+    margin: 20px 0;
+    overflow: hidden;
+    text-align: center;
+}
+
+.gui .string{
+    display: flex;
+    transform: translateX(calc(50% - 14px));
+    transition: 0.1s transform;
+}
+
+.gui .string *{
+    min-height: 1em;
+    font-weight: bold;
+    border: solid 5px var(--blue);
+    padding: 0 10px;
+    text-align: center;
+}
+
+.gui .head svg{
+    fill: var(--orange);
+    scale: 3;
+}
+
+.gui .head{
+    margin-bottom: 20px;
+}
+
+.gui .stack { 
+    display: flex;
+    justify-content: center;
+}
+
+.gui .stack *{
+    min-height: 1em;
+    font-weight: bold;
+    border: solid 5px var(--blue);
+    padding: 0 10px;
+    text-align: center;
 }

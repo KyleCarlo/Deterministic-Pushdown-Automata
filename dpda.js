@@ -100,17 +100,42 @@ const dpdaReader = function(input){
     finalStates = input[0].split(' ');
     if (finalStates.length !== numFStates) {
         throw new Error('Number of final states does not match the number of final states given.');
+    } 
+
+    for (let i = 0; i < finalStates.length; i++) {
+        if (!states.includes(finalStates[i])) {
+            throw new Error('Invalid final states.');
+        }
     }
 }
 
-const runDPDA = function(inputString){
-    console.log(inputs);
+const runDPDA = function(inputString, stringContainer){
+    let currentState = startState;
+    let availableTransitions = transitions[currentState];
+    let isAccepted = false;
+    let spanWidth = stringContainer.children().eq(0).outerWidth();
+
     for (let i = 0; i < inputString.length; i++) {
-        if (!inputs.includes(inputString[i])) {
-            console.log('REJECT');
-            break;
+        try{
+            setTimeout(function(){
+                let transitionFound = availableTransitions.find(transition => transition.s === inputString[i]);
+                currentState = transitionFound.q2;
+                availableTransitions = transitions[currentState];
+
+                spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
+                stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth) +'px))');
+                spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
+            }, 100 * i);
+        } catch (e) {
+            console.log(e);
         }
     }
+
+    // CHECK IF ACCEPTED
+    if (finalStates.includes(currentState)) 
+        isAccepted = true;
+    
+    return isAccepted;
 }
 
 export {dpdaReader, runDPDA};

@@ -10,15 +10,20 @@ const pause = $('#pause');
 const back = $('#backward');
 const forward = $('#forward');
 const reset = $('#reset');
+const speed = $('#speedInput');
 
 // INPUTS
 const machineInput = $('#machineInput'); 
+const inputString = $('#inputString');
 
 // ERROR HANDLERS
 const validation = $('.validation');
 const errorCover = $('.error-cover');
 const errorContainer = $('.error-details');
 const errorDetails = $('#errorDetails');
+
+// GUI ELEMENTS
+const stringContainer = $('.gui .string');
 
 // ERROR COVER
 errorContainer.on('click', function(){
@@ -61,8 +66,28 @@ readMachine.on('click', function(){
     }
 });
 
-run.prop('disabled', false);
+machineInput.on('input', function(){
+    validation.css('visibility', 'hidden');
+    genConBtn.prop('disabled', true);
+});
+
 // READING INPUT STRING
 run.on('click', function(){
-    runDPDA($('#inputString').val());
+    runDPDA(inputString.val(), stringContainer);
+});
+
+// UPDATING GUI
+inputString.on('input', function(){
+    console.log(speed.val());
+    stringContainer.empty();
+    for (let i = 0; i < inputString.val().length; i++) {
+        stringContainer.append('<span>' + inputString.val()[i] + '</span>');
+    }
+    if (inputString.val().length === 0) {
+        stringContainer.append('<span> </span>');
+        stringContainer.css('transform', 'translateX(calc(50% - 14.8px))');
+    } else {
+        let spanWidth = stringContainer.children().eq(0).outerWidth();
+        stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth /2) +'px))');
+    }
 });
