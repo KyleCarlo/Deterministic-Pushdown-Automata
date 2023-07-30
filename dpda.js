@@ -125,7 +125,7 @@ const runDPDA = function(inputString, stringContainer){
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
                 stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth) +'px))');
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
-            }, 100 * i);
+            }, 1000 * i);
         } catch (e) {
             console.log(e);
         }
