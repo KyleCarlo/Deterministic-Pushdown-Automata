@@ -135,18 +135,18 @@ const dpdaReader = function(input, stackContainer, stateContainer){
         }
 
         // IF INPUT ARE NOT DEFINED
-        if (transition[1] != 'λ')
+        if (transition[1] != 'ε')
             if (!inputs.includes(transition[1])) {
                 throw new Error('Invalid state transitions. 2');
             }
 
         // IF STACK SYMBOLS ARE NOT DEFINED
-        if (transition[0] != 'λ'){
+        if (transition[0] != 'ε'){
             // if (!stackSymbols.includes(transition[2]) || !stackSymbols.includes(transition[4])) {
             //     throw new Error('Invalid state transitions. 3');
             // }
         } else {
-            if (initStackSymbol == transition[2] && transition[4] == 'λ') {
+            if (initStackSymbol == transition[2] && transition[4] == 'ε') {
                 throw new Error('Invalid state transitions. 4');
             }
         }
@@ -165,12 +165,12 @@ const runDPDA = function(inputString, stringContainer, stackContainer, stateCont
     let animationSpeed = 100 * (11 - speed);
     let isAccepted = null;
     let spanWidth = stringContainer.children().eq(0).outerWidth();
-    inputString += 'λ';
+    let currentState = startState;
+    inputString += 'ε';
     
     for (let i = 0; i < inputString.length; i++){
         if (isAccepted == null){
             let stop = setTimeout(function(){
-                let currentState = startState;
                 console.log(currentState);
                 
                 let availableTransitions = transitions[currentState];
@@ -183,7 +183,7 @@ const runDPDA = function(inputString, stringContainer, stackContainer, stateCont
                 }
                 
                 console.log(transitionFound);
-                if (transitionFound.pop != 'λ'){
+                if (transitionFound.pop != 'ε'){
                     if (stack[stack.length-1] != transitionFound.pop){
                         reject(verdictContainer);
                         return true;
@@ -195,7 +195,7 @@ const runDPDA = function(inputString, stringContainer, stackContainer, stateCont
                     }
                 }
                 
-                if (transitionFound.push != 'λ'){
+                if (transitionFound.push != 'ε'){
                     stack.push(transitionFound.push);
                     stackContainer.append($('<span>').text(stack[stack.length-1]));
                 }
@@ -203,11 +203,13 @@ const runDPDA = function(inputString, stringContainer, stackContainer, stateCont
                 console.log(inputString[i]);
 
                 console.log(stack);
+                currentState = transitionFound.q2;
+                stateContainer.text(currentState);
 
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
                 stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth) +'px))');
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
-            }, animationSpeed*i);
+            }, animationSpeed * i);
         }
 
         if (stop == true){

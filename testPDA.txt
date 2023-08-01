@@ -8,8 +8,8 @@ Z
 A
 C
 5
-A 0 λ A a
-A 1 a B λ
-A λ Z C λ
-B 1 a B λ
-B λ Z C λ
+A 0 ε A a
+A 1 a B ε
+A ε Z C ε
+B 1 a B ε
+B ε Z C ε
