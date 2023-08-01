@@ -4,6 +4,7 @@
     --blue: #31C4BE;
     --orange: #f2b236;
     --btn-shadow: #718794;
+    --accept: rgb(197, 255, 197);
     --def-font: 'Montserrat', sans-serif;
 }
 
@@ -131,9 +132,9 @@ button:disabled{
 
 /** GUI **/
 .gui{
-    height: 150px;
+    /* height: 150px; */
     margin: 20px 0;
-    overflow: hidden;
+    overflow-x: hidden;
     text-align: center;
 }
 
@@ -160,6 +161,11 @@ button:disabled{
     margin-bottom: 20px;
 }
 
+.gui .state-info{
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+}
+
 .gui .stack { 
     display: flex;
     justify-content: center;
@@ -171,4 +177,24 @@ button:disabled{
     border: solid 5px var(--blue);
     padding: 0 10px;
     text-align: center;
+}
+
+.gui .current-state .container{
+    display: inline-flex;
+    min-width: 25px;
+    min-height: 25px;
+    border: solid 5px var(--blue);
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    border-radius: 25px;
+    margin: 2px;
+}
+
+.gui .verdict .container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+    color: var(--blue);
 }

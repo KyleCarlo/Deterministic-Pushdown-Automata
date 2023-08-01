@@ -1,4 +1,4 @@
-import {dpdaReader, runDPDA} from './dpda.js';
+import {dpdaReader, runDPDA, stepDPDA} from './dpda.js';
 
 // BUTTONS
 const inputFile = $('#inputFile');
@@ -24,6 +24,9 @@ const errorDetails = $('#errorDetails');
 
 // GUI ELEMENTS
 const stringContainer = $('.gui .string');
+const stateContainer = $('.gui .current-state .container span');
+const stackContainer = $('.gui .stack');
+const verdictContainer = $('.gui .verdict .container span');
 
 // ERROR COVER
 errorContainer.on('click', function(){
@@ -47,10 +50,10 @@ inputFile.on('change', function() {
     fr.readAsText(this.files[0]);
 });
 
-// READING MACHINE SPECIFICATION
+// READING MACHINE DEFINITION
 readMachine.on('click', function(){
     try {
-        dpdaReader(machineInput.val());
+        dpdaReader(machineInput.val(), stackContainer, stateContainer);
         genConBtn.prop('disabled', false);
         validation.css('visibility', 'visible');
     } catch (error) {
@@ -73,12 +76,15 @@ machineInput.on('input', function(){
 
 // READING INPUT STRING
 run.on('click', function(){
-    runDPDA(inputString.val(), stringContainer);
+    runDPDA(inputString.val(), stringContainer, stackContainer, stateContainer, verdictContainer, speed.val());
+});
+
+forward.on('click', function(){
+    stepDPDA(inputString.val(), stringContainer, stackContainer, stateContainer, verdictContainer);
 });
 
 // UPDATING GUI
 inputString.on('input', function(){
-    console.log(speed.val());
     stringContainer.empty();
     for (let i = 0; i < inputString.val().length; i++) {
         stringContainer.append('<span>' + inputString.val()[i] + '</span>');

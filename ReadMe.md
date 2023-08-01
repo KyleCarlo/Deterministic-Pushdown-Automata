@@ -1,11 +1,13 @@
 # Machine Definition File Format
 - The machine definition follows the format below by line
-    1. number of states 
-    2. list of states 
-    3. number of inputs 
-    4. list of inputs 
-    5. number of transitions
-    6. transitions in the format q s q’ such that f(q,s) = q’ (one transition per line)
-    7. start state
-    8. number of final states
-    9. list of final states
+    1. number of states
+    2. list of states
+    3. number of input alphabets
+    4. list of input alphabets
+    5. number of stack alphabets
+    6. list of stack alphabets
+    7. initial stack alphabet
+    8. start state
+    9. final state
+    10. number of transitions
+    11. list of transitions in the format q s pop q’ push such that f(q,s,pop) = (q’,push)

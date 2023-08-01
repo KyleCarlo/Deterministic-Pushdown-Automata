@@ -1,8 +1,15 @@
-5
-A B C D E
+3
+A B C
 2
-a b
-6
-A a n B n
-B b n A X
-A n n C n
+0 1
+1
+a
+Z
+A
+C
+5
+A 0 λ A a
+A 1 a B λ
+A λ Z C λ
+B 1 a B λ
+B λ Z C λ

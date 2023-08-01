@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="machineOutput">
-        <h1 class="title">Output</h1>
+        <h1 class="title">Deterministic Pushdown Automata</h1>
         <div class="gui">
             <p>INPUT</p>
             <hr>
@@ -24,34 +24,51 @@
                     </g>
                 </svg>
             </div>
-            <p>STACK</p>
-            <hr>
-            <div class="stack">
-                <span>Z</span>
+            <div class="state-info">
+                <div class="current-state">
+                    <p>CURRENT STATE</p>
+                    <div class="container">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="stack-info">
+                    <p>STACK</p>
+                    <hr>
+                    <div class="stack">
+                        <span></span>
+                    </div>
+                    <hr>
+                </div>
+                <div class="verdict">
+                    <p>VERDICT</p>
+                    <div class="container">
+                        <span>--</span>
+                    </div>
+                </div>
             </div>
-            <hr>
         </div>
         
     </div>
     
     <div class="inputs">
         <div class="formatDesc">
-            <h3 class="title">Machine Input Format</h3>
+            <h3 class="title">Machine Definition Input Format</h3>
             <p>The machine definition follows the format below per line of text:</p>
             <ol>
                 <li>number of states</li>
                 <li>list of states</li>
-                <li>number of inputs</li>
-                <li>list of inputs</li>
+                <li>number of input alphabets</li>
+                <li>list of input alphabets</li>
+                <li>number of stack alphabets</li>
+                <li>list of stack alphabets</li>
+                <li>initial stack alphabet</li>
+                <li>final state</li>
                 <li>number of transitions</li>
-                <li>transitions in the format <em>q s pop q' push</em> such that <br> δ(q, s, pop) = {(q', push)} </li>
-                <li>start state</li>
-                <li>number of final states</li>
-                <li>list of final states</li>
+                <li>list of transitions in the format <em>q s pop q' push</em> such that <em>f(q,s,pop) = (q', push)</em></li>
             </ol>
         </div>
         <div class="read">
-            <label for="machineInput"><h3 class="title">Input Machine Description</h3></label>
+            <label for="machineInput"><h3 class="title">Machine Definition</h3></label>
             <textarea name="machineDesc" id="machineInput"></textarea>
             <p class="validation">Machine Accepted.</p>
             <div class="buttons">
@@ -65,7 +82,7 @@
             <input type="text" id="inputString">
 
             <h3 class="title">Control</h3>
-            <input type="range" name="range" id="speedInput" min="0" max="10">
+            <input type="range" name="range" id="speedInput" min="1" max="10">
             <div class="buttons-1">  
                 <button id="runInput" disabled>RUN</button>
                 <button id="pause" disabled>PAUSE</button>

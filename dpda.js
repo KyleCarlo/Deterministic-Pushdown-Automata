@@ -2,33 +2,48 @@ var numStates;
 var states = [];
 var numInputs; 
 var inputs = [];
+var numStackSymbols;
+var stackSymbols = [];
+var initStackSymbol;
 var numTransitions;
 var transitions = {};
 var startState;
-var numFStates;
-var finalStates = [];
+var finalState;
+var stack = [];
 
-function transitionConstructor(s, q2, pop, push) {
-    this.s = s;
-    this.q2 = q2;
-    this.pop = pop;
-    this.push = push;
+class Transition {
+    constructor(s, pop, q2, push) {
+        this.s = s;
+        this.pop = pop;
+        this.q2 = q2;
+        this.push = push;
+    }
 }
 
 function resetDPDA() {
     numStates = null;
     states = [];
-    numInputs = null;
+    numInputs = null; 
     inputs = [];
+    numStackSymbols = null;
+    stackSymbols = [];
+    initStackSymbol = null;
     numTransitions = null;
     transitions = {};
     startState = null;
-    numFStates = null;
-    finalStates = [];
+    finalState = null;
+    stack = [];
 }
 
-const dpdaReader = function(input){
+function reject(container){
+    container.text('Rejected');
+    container.css('color', 'red');
+}
+
+const dpdaReader = function(input, stackContainer, stateContainer){
     resetDPDA();
+    stackContainer.empty();
+    stackContainer.append($('<span>').text(' '));
 
     if (input === '') {
         throw new Error('Empty input.');
@@ -36,7 +51,7 @@ const dpdaReader = function(input){
 
     input = input.split('\n');
 
-    // READ STATES
+    // 1-2. STATES
     numStates = input[0];
     numStates = parseInt(numStates);
     if (isNaN(numStates)) {
@@ -52,7 +67,7 @@ const dpdaReader = function(input){
         transitions[states[i]] = [];
     }
 
-    // READ SYMBOLS
+    // 3-4. INPUT SYMBOLS
     input = input.slice(1);
     numInputs = parseInt(input[0]);
     if (isNaN(numInputs)) {
@@ -65,77 +80,145 @@ const dpdaReader = function(input){
         throw new Error('Number of inputs does not match the number of inputs given.');
     }
 
-    // READ TRANSITIONS 
-    // Transition format: q1 s pop q2 push
+    // 5-6. STACK SYMBOLS
     input = input.slice(1);
-    numTransitions = parseInt(input[0]);
-    for(let i = 0; i < numTransitions; i++) {
-        input = input.slice(1);
-        let transition = input[0].split(' ');
-        // if (transition.length !== 4) {
-        //     throw new Error('Invalid transition format.');
-        // }
-        if (!states.includes(transition[0]) || !states.includes(transition[2])) {
-            throw new Error('Invalid state transitions.');
-        }
-
-        transitions[transition[0]].push(new transitionConstructor(transition[1], transition[2], transition[3], transition[3]));
+    numStackSymbols = parseInt(input[0]);
+    if (isNaN(numStackSymbols)) {
+        throw new Error('Invalid number of stack symbols.');
     }
 
-    // READ START STATE
+    input = input.slice(1);
+    stackSymbols = input[0].split(' ');
+    if (stackSymbols.length !== numStackSymbols) {
+        throw new Error('Number of stack symbols does not match the number of stack symbols given.');
+    }
+
+    // 7-8. INITIAL STACK SYMBOL
+    input = input.slice(1);
+    initStackSymbol = input[0];
+    if (stackSymbols.includes(initStackSymbol) || initStackSymbol === '' || initStackSymbol === ' ') {
+        throw new Error('Invalid initial stack symbol.');
+    }
+
+    // 9. START STATE
     input = input.slice(1);
     startState = input[0];
     if (!states.includes(startState)) {
         throw new Error('Invalid start state.');
     }
 
-    // READ FINAL STATES
+    // 10. FINAL STATE
     input = input.slice(1);
-    numFStates = parseInt(input[0]);
-    if (isNaN(numFStates)) {
-        throw new Error('Invalid number of final states.');
+    finalState = input[0];
+    if (!states.includes(finalState)) {
+        throw new Error('Invalid final state.');
     }
 
+    // 11-. TRANSITIONS 
+    // Transition format: q s pop q' push
     input = input.slice(1);
-    finalStates = input[0].split(' ');
-    if (finalStates.length !== numFStates) {
-        throw new Error('Number of final states does not match the number of final states given.');
-    } 
-
-    for (let i = 0; i < finalStates.length; i++) {
-        if (!states.includes(finalStates[i])) {
-            throw new Error('Invalid final states.');
+    numTransitions = parseInt(input[0]);
+    if (isNaN(numTransitions)) {
+        throw new Error('Invalid number of transitions.');
+    }
+    
+    for(let i = 0; i < numTransitions; i++) {
+        input = input.slice(1);
+        let transition = input[0].split(' ');
+        if (transition.length !== 5) {
+            throw new Error('Invalid transition format.');
         }
+
+        // IF STATES ARE NOT DEFINED
+        if (!states.includes(transition[0]) || !states.includes(transition[3])) {
+            throw new Error('Invalid state transitions. 1');
+        }
+
+        // IF INPUT ARE NOT DEFINED
+        if (transition[1] != 'λ')
+            if (!inputs.includes(transition[1])) {
+                throw new Error('Invalid state transitions. 2');
+            }
+
+        // IF STACK SYMBOLS ARE NOT DEFINED
+        if (transition[0] != 'λ'){
+            // if (!stackSymbols.includes(transition[2]) || !stackSymbols.includes(transition[4])) {
+            //     throw new Error('Invalid state transitions. 3');
+            // }
+        } else {
+            if (initStackSymbol == transition[2] && transition[4] == 'λ') {
+                throw new Error('Invalid state transitions. 4');
+            }
+        }
+
+        transitions[transition[0]].push(new Transition(transition[1], transition[2], transition[3], transition[4]));
     }
+
+    stack.push(initStackSymbol);
+    stackContainer.empty();
+    
+    stackContainer.append($('<span>').text(stack[0]));
+    stateContainer.text(startState);
 }
 
-const runDPDA = function(inputString, stringContainer){
-    let currentState = startState;
-    let availableTransitions = transitions[currentState];
-    let isAccepted = false;
+const runDPDA = function(inputString, stringContainer, stackContainer, stateContainer, verdictContainer, speed){
+    let animationSpeed = 100 * (11 - speed);
+    let isAccepted = null;
     let spanWidth = stringContainer.children().eq(0).outerWidth();
+    inputString += 'λ';
+    
+    for (let i = 0; i < inputString.length; i++){
+        if (isAccepted == null){
+            let stop = setTimeout(function(){
+                let currentState = startState;
+                console.log(currentState);
+                
+                let availableTransitions = transitions[currentState];
 
-    for (let i = 0; i < inputString.length; i++) {
-        try{
-            setTimeout(function(){
                 let transitionFound = availableTransitions.find(transition => transition.s === inputString[i]);
-                currentState = transitionFound.q2;
-                availableTransitions = transitions[currentState];
+                
+                if (transitionFound == undefined) {
+                    reject(verdictContainer);
+                    return true;
+                }
+                
+                console.log(transitionFound);
+                if (transitionFound.pop != 'λ'){
+                    if (stack[stack.length-1] != transitionFound.pop){
+                        reject(verdictContainer);
+                        return true;
+                    } else {
+                        stack.pop();
+                        stackContainer.children().last().remove();
+                        if (stackContainer.children().length == 0)
+                            stackContainer.append($('<span>').text(' '));
+                    }
+                }
+                
+                if (transitionFound.push != 'λ'){
+                    stack.push(transitionFound.push);
+                    stackContainer.append($('<span>').text(stack[stack.length-1]));
+                }
+                console.log(i);
+                console.log(inputString[i]);
+
+                console.log(stack);
 
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
                 stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth) +'px))');
                 spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
-            }, 1000 * i);
-        } catch (e) {
-            console.log(e);
+            }, animationSpeed*i);
+        }
+
+        if (stop == true){
+            isAccepted = false;
+            break;
         }
     }
-
-    // CHECK IF ACCEPTED
-    if (finalStates.includes(currentState)) 
-        isAccepted = true;
-    
-    return isAccepted;
 }
 
-export {dpdaReader, runDPDA};
+const stepDPDA = function(inputString, stringContainer, stackContainer, stateContainer, verdictContainer){
+
+};
+
+export {dpdaReader, runDPDA, stepDPDA};
