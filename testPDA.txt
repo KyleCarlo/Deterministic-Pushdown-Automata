@@ -2,14 +2,14 @@
 A B C
 2
 0 1
-1
-a
-Z
+2
+a Z
+4
+A 0 * A a
+A 1 a B *
+B 1 a B *
+B * Z C *
 A
+Z
+1
 C
-5
-A 0 ε A a
-A 1 a B ε
-A ε Z C ε
-B 1 a B ε
-B ε Z C ε

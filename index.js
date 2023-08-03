@@ -1,4 +1,4 @@
-import {dpdaReader, runDPDA, stepDPDA} from './dpda.js';
+import {dpdaReader, runDPDA, stepDPDA, resetGUI} from './dpda.js';
 
 // BUTTONS
 const inputFile = $('#inputFile');
@@ -6,11 +6,9 @@ const pseudoBtn = $('#inputFileBtn');
 const readMachine = $('#readMachine');
 const genConBtn = $('.control button');
 const run = $('#runInput');
-const pause = $('#pause');
-const back = $('#backward');
-const forward = $('#forward');
 const reset = $('#reset');
 const speed = $('#speedInput');
+const step = $('.inputs .control .buttons-2');
 
 // INPUTS
 const machineInput = $('#machineInput'); 
@@ -26,6 +24,7 @@ const errorDetails = $('#errorDetails');
 const stringContainer = $('.gui .string');
 const stateContainer = $('.gui .current-state .container span');
 const stackContainer = $('.gui .stack');
+const pointer = $('.gui .head .pointer');
 const verdictContainer = $('.gui .verdict .container span');
 
 // ERROR COVER
@@ -55,6 +54,7 @@ readMachine.on('click', function(){
     try {
         dpdaReader(machineInput.val(), stackContainer, stateContainer);
         genConBtn.prop('disabled', false);
+        $('#backward').prop('disabled', true);
         validation.css('visibility', 'visible');
     } catch (error) {
         console.log(error.message);
@@ -71,29 +71,32 @@ readMachine.on('click', function(){
 
 machineInput.on('input', function(){
     validation.css('visibility', 'hidden');
+    resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
     genConBtn.prop('disabled', true);
 });
 
 // READING INPUT STRING
 run.on('click', function(){
-    runDPDA(inputString.val(), stringContainer, stackContainer, stateContainer, verdictContainer, speed.val());
+    run.prop('disabled', true);
+    runDPDA(inputString.val(), stringContainer, stateContainer, stackContainer, pointer, verdictContainer, speed.val());
 });
 
-forward.on('click', function(){
-    stepDPDA(inputString.val(), stringContainer, stackContainer, stateContainer, verdictContainer);
+reset.on('click', function(){
+    resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
+});
+
+step.on('click', function(e){
+    stepDPDA(inputString.val(), stringContainer, stateContainer, stackContainer, pointer, verdictContainer, e.target.id);
 });
 
 // UPDATING GUI
 inputString.on('input', function(){
     stringContainer.empty();
+    stringContainer.append($('<span class="pointer"></span>'));
     for (let i = 0; i < inputString.val().length; i++) {
         stringContainer.append('<span>' + inputString.val()[i] + '</span>');
     }
     if (inputString.val().length === 0) {
-        stringContainer.append('<span> </span>');
-        stringContainer.css('transform', 'translateX(calc(50% - 14.8px))');
-    } else {
-        let spanWidth = stringContainer.children().eq(0).outerWidth();
-        stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth /2) +'px))');
+        stringContainer.append('<span></span>');
     }
 });

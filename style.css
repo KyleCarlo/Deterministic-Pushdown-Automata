@@ -25,6 +25,11 @@ body{
     min-height: 100vh;
 }
 
+hr{
+    height: 1px;
+    border-width: 1px;
+}
+
 button{
     background-color: var(--secondary-color);
     font-family: inherit;
@@ -132,7 +137,6 @@ button:disabled{
 
 /** GUI **/
 .gui{
-    /* height: 150px; */
     margin: 20px 0;
     overflow-x: hidden;
     text-align: center;
@@ -140,43 +144,53 @@ button:disabled{
 
 .gui .string{
     display: flex;
-    transform: translateX(calc(50% - 14px));
+    height: 40px;
+    transform: translateX(calc(50% - (20px)));
     transition: 0.1s transform;
 }
 
-.gui .string *{
-    min-height: 1em;
+.gui .string *, .gui .stack *{
+    width: 20px;
+    height: 20px;
     font-weight: bold;
     border: solid 5px var(--blue);
-    padding: 0 10px;
+    padding: 5px;
     text-align: center;
 }
 
+.gui .string .pointer{
+    border: solid 5px transparent;
+}
+
+.gui .head .pointer{
+    width: 20px;
+    height: 20px;
+    border: solid 5px var(--orange);
+    padding: 5px;
+    position: relative;
+    left: calc(50% - 20px);
+}
+
 .gui .head svg{
+    margin-top: 7px;
     fill: var(--orange);
     scale: 3;
 }
 
 .gui .head{
-    margin-bottom: 20px;
+    position: relative;
+    top: -42.5px;
 }
 
 .gui .state-info{
     display: grid;
     grid-template-columns: 1fr 5fr 1fr;
+    margin-top: -20px;
 }
 
 .gui .stack { 
     display: flex;
     justify-content: center;
-}
-
-.gui .stack *{
-    min-height: 1em;
-    font-weight: bold;
-    border: solid 5px var(--blue);
-    padding: 0 10px;
-    text-align: center;
 }
 
 .gui .current-state .container{

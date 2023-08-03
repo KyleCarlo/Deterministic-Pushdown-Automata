@@ -1,3 +1,4 @@
+// MACHINE VARIABLES
 var numStates;
 var states = [];
 var numInputs; 
@@ -8,12 +9,22 @@ var initStackSymbol;
 var numTransitions;
 var transitions = {};
 var startState;
-var finalState;
+var numFinalStates;
+var finalStates = {};
 var stack = [];
+var allTransitions = [];
+
+// GUI VARIABLES
+var step = 0;
+var verdict;
+var animate;
+var verdictAnimate;
+var spanWidth = 20;
+var iString = 0;
 
 class Transition {
-    constructor(s, pop, q2, push) {
-        this.s = s;
+    constructor(input, pop, q2, push) {
+        this.input = input;
         this.pop = pop;
         this.q2 = q2;
         this.push = push;
@@ -27,17 +38,69 @@ function resetDPDA() {
     inputs = [];
     numStackSymbols = null;
     stackSymbols = [];
+    stack = [];
     initStackSymbol = null;
     numTransitions = null;
     transitions = {};
     startState = null;
-    finalState = null;
-    stack = [];
+    numFinalStates = null;
+    finalStates = [];
+    allTransitions = [];
+}
+
+// DPDA MACHINE
+function DPDA(inputString){
+    allTransitions = [];
+    let currentState = startState;
+    let loop = true;
+    let i = 0;
+    allTransitions.push({
+        'state': currentState,
+        'input': '',
+        'stack': [initStackSymbol]
+    })
+
+    while (loop){
+        let input = inputString[i];
+        let availableTransitions = transitions[currentState];
+        let transitionFound = availableTransitions.find(transition => (transition.input === input || transition.input === '')
+                                                        && (transition.pop === stack[stack.length-1] || transition.pop === ''));
+        
+        if (transitionFound == undefined || i == inputString.length && finalStates.includes(currentState) && stack.length == 0) {
+            loop = false;
+        } else {
+            if(transitionFound.input !== '')
+                i++;
+            else 
+                input = '';
+            if(transitionFound.pop !== '')
+                stack.pop();
+            if(transitionFound.push !== '')
+                stack.push(transitionFound.push);
+            currentState = transitionFound.q2;
+
+            allTransitions.push({
+                'state': currentState,
+                'input': input,
+                'stack': stack.slice()
+            });
+        }
+    }
+
+    if(i == inputString.length && finalStates.includes(currentState) && stack.length == 0)
+        return 'accepted';
+    else
+        return 'rejected';
 }
 
 function reject(container){
     container.text('Rejected');
     container.css('color', 'red');
+}
+
+function accept(container){
+    container.text('Accepted');
+    container.css('color', 'var(--accept)');
 }
 
 const dpdaReader = function(input, stackContainer, stateContainer){
@@ -74,11 +137,22 @@ const dpdaReader = function(input, stackContainer, stateContainer){
         throw new Error('Invalid number of inputs.');
     }
 
-    input = input.slice(1);
-    inputs = input[0].split(' ');
-    if (inputs.length !== numInputs) {
-        throw new Error('Number of inputs does not match the number of inputs given.');
+    if (numInputs > 0) {
+        input = input.slice(1);
+        inputs = input[0].split(' ');
+        if (inputs.length !== numInputs) {
+            throw new Error('Number of inputs does not match the number of inputs given.');
+        }
+        if(inputs.includes('*')){
+            throw new Error('* cannot be part of input alphabet as it represents the empty string.');
+        }
+        for(let i = 0; i < inputs.length; i++){
+            if (inputs[i].length != 1){
+                throw new Error('Only single-character inputs are accepted.');
+            }
+        }
     }
+    
 
     // 5-6. STACK SYMBOLS
     input = input.slice(1);
@@ -92,12 +166,91 @@ const dpdaReader = function(input, stackContainer, stateContainer){
     if (stackSymbols.length !== numStackSymbols) {
         throw new Error('Number of stack symbols does not match the number of stack symbols given.');
     }
+    
+    for(let i = 0; i < stackSymbols.length; i++){
+        if (stackSymbols[i].length != 1) {
+            throw new Error('Only single-character stack symbols are accepted.');
+        }
+    }
 
-    // 7-8. INITIAL STACK SYMBOL
+    // 7-8. TRANSITIONS
+    // Transition format: q s pop q' push
     input = input.slice(1);
-    initStackSymbol = input[0];
-    if (stackSymbols.includes(initStackSymbol) || initStackSymbol === '' || initStackSymbol === ' ') {
-        throw new Error('Invalid initial stack symbol.');
+    numTransitions = parseInt(input[0]);
+    
+    if (isNaN(numTransitions)) {
+        throw new Error('Invalid number of transitions.');
+    }
+    
+    for(let i = 0; i < numTransitions; i++) {
+        input = input.slice(1);
+        let newTrans = input[0].split(' ');
+        if (newTrans.length !== 5) {
+            throw new Error('Invalid transition format.');
+        }
+
+        // IF STATES ARE NOT DEFINED
+        if (!states.includes(newTrans[0]) || !states.includes(newTrans[3])) {
+            throw new Error('Invalid state transitions.');
+        }
+
+        // IF INPUT ARE NOT DEFINED
+        if (newTrans[1] != '*')
+            if (!inputs.includes(newTrans[1])) {
+                throw new Error('Invalid state transitions.');
+            }
+
+        // IF STACK SYMBOLS ARE NOT DEFINED
+        if (newTrans[2] != '*')
+            if (!stackSymbols.includes(newTrans[2])) {
+                throw new Error('Invalid state transitions.');
+            }
+        if (newTrans[4] != '*')
+            if (!stackSymbols.includes(newTrans[4])) {
+                throw new Error('Invalid state transitions.');
+            }
+
+        // CHECKING FOR DETERMINISM 
+        if (newTrans[1] == '*') {
+            newTrans[1] = '';
+        }
+        if (newTrans[2] == '*') {
+            newTrans[2] = '';
+        }
+        if (newTrans[4] == '*') {
+            newTrans[4] = '';
+        }
+
+        let state = newTrans[0];
+        let newInput = newTrans[1];
+        let newPop = newTrans[2];
+        for(let j = 0; j < transitions[state].length; j++){
+            if(transitions[state][j].input == '' && transitions[state][j].pop == ''){
+                throw new Error('Non-deterministic.');
+            }
+            if(newInput == "" && newPop == ""){
+                throw newError('Non-deterministic.');
+            }
+            if(transitions[state][j].input == newInput){
+                if(transitions[state][j].pop == newPop ||
+                    newPop == "" ||
+                    transitions[state][j].pop == ""){
+                        throw new Error('Non-deterministic');
+                }
+            }
+            if(transitions[state][j].pop == newPop){
+                if(newInput == "" ||
+                    transitions[state][j].input == ""){
+                        throw new Error('Non-deterministic');
+                }
+            }
+            if((newPop == "" && transitions[state][j].input == "") ||
+                (newInput == "" && transitions[state][j].pop == "")){
+                throw new Error('Non-deterministic');
+            }
+        }
+
+        transitions[newTrans[0]].push(new Transition(newTrans[1], newTrans[2], newTrans[3], newTrans[4]));
     }
 
     // 9. START STATE
@@ -107,53 +260,29 @@ const dpdaReader = function(input, stackContainer, stateContainer){
         throw new Error('Invalid start state.');
     }
 
-    // 10. FINAL STATE
+    // 10. INITIAL STACK SYMBOL
     input = input.slice(1);
-    finalState = input[0];
-    if (!states.includes(finalState)) {
-        throw new Error('Invalid final state.');
+    initStackSymbol = input[0];
+    if (!stackSymbols.includes(initStackSymbol)) {
+        throw new Error('Invalid initial stack symbol.');
     }
 
-    // 11-. TRANSITIONS 
-    // Transition format: q s pop q' push
+    // 11. FINAL STATES
     input = input.slice(1);
-    numTransitions = parseInt(input[0]);
-    if (isNaN(numTransitions)) {
-        throw new Error('Invalid number of transitions.');
-    }
-    
-    for(let i = 0; i < numTransitions; i++) {
-        input = input.slice(1);
-        let transition = input[0].split(' ');
-        if (transition.length !== 5) {
-            throw new Error('Invalid transition format.');
-        }
-
-        // IF STATES ARE NOT DEFINED
-        if (!states.includes(transition[0]) || !states.includes(transition[3])) {
-            throw new Error('Invalid state transitions. 1');
-        }
-
-        // IF INPUT ARE NOT DEFINED
-        if (transition[1] != 'ε')
-            if (!inputs.includes(transition[1])) {
-                throw new Error('Invalid state transitions. 2');
-            }
-
-        // IF STACK SYMBOLS ARE NOT DEFINED
-        if (transition[0] != 'ε'){
-            // if (!stackSymbols.includes(transition[2]) || !stackSymbols.includes(transition[4])) {
-            //     throw new Error('Invalid state transitions. 3');
-            // }
-        } else {
-            if (initStackSymbol == transition[2] && transition[4] == 'ε') {
-                throw new Error('Invalid state transitions. 4');
-            }
-        }
-
-        transitions[transition[0]].push(new Transition(transition[1], transition[2], transition[3], transition[4]));
+    numFinalStates = parseInt(input[0]);
+    if (isNaN(numFinalStates)) {
+        throw new Error('Invalid number of final states.');
     }
 
+    input = input.slice(1);
+    finalStates = input[0].split(' ');
+    for (let i = 0; i < finalStates.length; i++) {
+        if (!states.includes(finalStates[i])) {
+            throw new Error('Invalid final state.');
+        }
+    }
+
+    // INITIAL STACK SYMBOL
     stack.push(initStackSymbol);
     stackContainer.empty();
     
@@ -161,66 +290,148 @@ const dpdaReader = function(input, stackContainer, stateContainer){
     stateContainer.text(startState);
 }
 
-const runDPDA = function(inputString, stringContainer, stackContainer, stateContainer, verdictContainer, speed){
-    let animationSpeed = 100 * (11 - speed);
-    let isAccepted = null;
-    let spanWidth = stringContainer.children().eq(0).outerWidth();
-    let currentState = startState;
-    inputString += 'ε';
-    
-    for (let i = 0; i < inputString.length; i++){
-        if (isAccepted == null){
-            let stop = setTimeout(function(){
-                console.log(currentState);
-                
-                let availableTransitions = transitions[currentState];
+const runDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, speed){
+    verdict = DPDA(inputString);
+    var animationSpeed = 100 * (11-speed);
 
-                let transitionFound = availableTransitions.find(transition => transition.s === inputString[i]);
-                
-                if (transitionFound == undefined) {
-                    reject(verdictContainer);
-                    return true;
-                }
-                
-                console.log(transitionFound);
-                if (transitionFound.pop != 'ε'){
-                    if (stack[stack.length-1] != transitionFound.pop){
-                        reject(verdictContainer);
-                        return true;
-                    } else {
-                        stack.pop();
-                        stackContainer.children().last().remove();
-                        if (stackContainer.children().length == 0)
-                            stackContainer.append($('<span>').text(' '));
-                    }
-                }
-                
-                if (transitionFound.push != 'ε'){
-                    stack.push(transitionFound.push);
-                    stackContainer.append($('<span>').text(stack[stack.length-1]));
-                }
-                console.log(i);
-                console.log(inputString[i]);
+    stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');  
+    stack = [initStackSymbol];
 
-                console.log(stack);
-                currentState = transitionFound.q2;
-                stateContainer.text(currentState);
+    $('#run').prop('disabled', true);
+    $('#forward').prop('disabled', true);
+    for (let i = 0; i < allTransitions.length; i++) {
+        animate = setTimeout(function() {
+            step++;
 
-                spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
-                stringContainer.css('transform', 'translateX(calc(50% - '+ (spanWidth) +'px))');
-                spanWidth += stringContainer.children().eq(i+1).outerWidth()/2;
-            }, animationSpeed * i);
-        }
+            // UPDATE STACK
+            stackContainer.empty();
+            for (let j = 0; j < allTransitions[i].stack.length; j++) {
+                stackContainer.append($('<span>').text(allTransitions[i].stack[j]));
+            }
+            if (stackContainer.children().length == 0) {
+                stackContainer.append($('<span>'));
+            }
 
-        if (stop == true){
-            isAccepted = false;
-            break;
-        }
+            // UPDATE STATE
+            stateContainer.text(allTransitions[i].state);
+            
+            // UPDATE INPUT STRING
+            if (allTransitions[i].input != '' || iString == inputString.length) {
+                spanWidth += 39.6;
+                pointer.css('border', 'solid 5px var(--orange)');
+                stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');      
+                iString++;         
+            }
+        }, animationSpeed * i);
     }
+    verdictAnimate = setTimeout(function() {
+        step--;
+        $('#backward').prop('disabled', false);
+        if (verdict != null){
+            if (verdict == 'accepted') 
+                accept(verdictContainer);
+            else
+                reject(verdictContainer);
+        }
+    }, animationSpeed * allTransitions.length);
 }
 
-const stepDPDA = function(inputString, stringContainer, stackContainer, stateContainer, verdictContainer){
+const stepDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, direction){
+    if (allTransitions.length == 0) 
+        verdict = DPDA(inputString);
 
+    // FORWARD
+    if (direction == 'forward') {
+        if (step < allTransitions.length - 1)
+            step++;
+        $('#backward').prop('disabled', false);
+        // UPDATE STACK
+        stackContainer.empty();
+        for (let j = 0; j < allTransitions[step].stack.length; j++) {
+            stackContainer.append($('<span>').text(allTransitions[step].stack[j]));
+        }
+        if (stackContainer.children().length == 0) {
+            stackContainer.append($('<span>'));
+        }
+
+        // UPDATE STATE
+        stateContainer.text(allTransitions[step].state);
+
+        // UPDATE INPUT STRING
+        if (allTransitions[step].input != '' || iString == inputString.length) {
+            spanWidth += 39.6;
+            pointer.css('border', 'solid 5px var(--orange)');
+            stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
+            
+            iString++;         
+        } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
+            pointer.css('border', 'solid 5px transparent');
+        }
+
+        if (step == allTransitions.length - 1) {
+            if (verdict == 'accepted') 
+                accept(verdictContainer);
+            else if (verdict == 'rejected')
+                reject(verdictContainer);
+            $('#forward').prop('disabled', true);
+        }
+    }
+
+    // BACKWARD
+    if (direction == 'backward') {
+        if (step > 0)
+            step--;
+
+        // UPDATE STACK
+        stackContainer.empty();
+        for (let j = 0; j < allTransitions[step].stack.length; j++) {
+            stackContainer.append($('<span>').text(allTransitions[step].stack[j]));
+        }
+        if (stackContainer.children().length == 0) {
+            stackContainer.append($('<span>'));
+        }
+
+        // UPDATE STATE
+        stateContainer.text(allTransitions[step].state);
+
+        // UPDATE INPUT STRING
+        if (allTransitions[step].input != '' || iString == 1) {
+            spanWidth -= 39.6;
+            pointer.css('border', 'solid 5px var(--orange)');
+            stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
+            iString--;         
+        } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
+            pointer.css('border', 'solid 5px transparent');
+        }
+
+        if (step >= 0) {
+            verdictContainer.text('--');
+            verdictContainer.css('color', 'var(--blue)');
+            $('#forward').prop('disabled', false);
+        }
+
+        if (step == 0) {
+            $('#backward').prop('disabled', true);
+        }
+    }
 };
 
-export {dpdaReader, runDPDA, stepDPDA};
+const resetGUI = function(stringContainer, stateContainer, stackContainer, pointer, verdictContainer){
+    spanWidth = 20;
+    iString = 0;
+    step = 0;
+    stateContainer.text(startState);
+    stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');
+    pointer.css('border', 'solid 5px var(--orange)');
+    verdictContainer.text('--');
+    verdictContainer.css('color', 'var(--blue)');
+    stackContainer.empty();
+    stackContainer.append($('<span>').text(initStackSymbol));
+    // clearTimeout(animate);
+    // clearTimeout(verdictAnimate);
+    $('#forward').prop('disabled', false);
+    $('#backward').prop('disabled', true);
+    $('#runInput').prop('disabled', false);
+}
+
+export {dpdaReader, runDPDA, stepDPDA, resetGUI};

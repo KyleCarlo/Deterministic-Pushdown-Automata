@@ -13,10 +13,12 @@
             <p>INPUT</p>
             <hr>
             <div class="string">
+                <span class="pointer"></span>
                 <span></span>
             </div>
             <hr>
             <div class="head">
+                <div class='pointer'></div>
                 <svg height="10px" width="10px" viewBox="0 0 32 32">
                     <g>
                         <path d="M24.4,24c-0.9,0-1.8-0.3-2.5-1l-5.8-5.7c-0.1-0.1-0.2-0.1-0.3,0L10.1,23c-1.4,1.4-3.6,1.4-5,0c-0.7-0.7-1-1.6-1-2.5
@@ -57,14 +59,20 @@
             <ol>
                 <li>number of states</li>
                 <li>list of states</li>
-                <li>number of input alphabets</li>
-                <li>list of input alphabets</li>
-                <li>number of stack alphabets</li>
-                <li>list of stack alphabets</li>
-                <li>initial stack alphabet</li>
-                <li>final state</li>
+                <li>number of symbols in the input alphabet</li>
+                <li>input alphabet</li>
+                <li>number of symbols in the alphabet</li>
+                <li>stack alphabet</li>
                 <li>number of transitions</li>
                 <li>list of transitions in the format <em>q s pop q' push</em> such that <em>f(q,s,pop) = (q', push)</em></li>
+                <ul>
+                    <li>Note that for this simulation, only single-character inputs and single-character push/pop to the stack are accepted</li>
+                    <li>DPDA's formal definition is followed for other rules regarding transitions</li>
+                </ul>
+                <li>start state</li>
+                <li>initial stack symbol</li>
+                <li>number of final states</li>
+                <li>list of final states</li>
             </ol>
         </div>
         <div class="read">
@@ -85,12 +93,11 @@
             <input type="range" name="range" id="speedInput" min="1" max="10">
             <div class="buttons-1">  
                 <button id="runInput" disabled>RUN</button>
-                <button id="pause" disabled>PAUSE</button>
+                <button id="reset" disabled>RESET</button>
             </div>
             <div class="buttons-2">
                 <button id="backward" disabled><<</button>
                 <button id="forward" disabled>>></button>
-                <button id="reset" disabled>RESET</button>
             </div>
         </div>
     </div>
