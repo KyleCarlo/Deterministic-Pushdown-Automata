@@ -60,7 +60,7 @@
                 <li>list of states</li>
                 <li>number of symbols in the input alphabet</li>
                 <li>input alphabet</li>
-                <li>number of symbols in the alphabet</li>
+                <li>number of symbols in the stack alphabet</li>
                 <li>stack alphabet</li>
                 <li>number of transitions</li>
                 <li>list of transitions in the format <em>q s pop q' push</em> such that <em>f(q,s,pop) = (q', push)</em></li>
@@ -76,7 +76,23 @@
         </div>
         <div class="read">
             <label for="machineInput"><h3 class="title">Machine Definition</h3></label>
-            <textarea name="machineDesc" id="machineInput"></textarea>
+            <textarea name="machineDesc" id="machineInput">5
+                0 1 2 3 4
+                2
+                a b
+                2
+                X Z
+                6
+                0 * Z 1 *
+                1 * * 2 Z
+                2 a * 2 X
+                2 b X 3 *
+                3 b X 3 *
+                3 * Z 4 *
+                0
+                Z
+                2
+                1 4</textarea>
             <p class="validation">Machine Accepted.</p>
             <div class="buttons">
                 <button id="inputFileBtn">IMPORT</button>
