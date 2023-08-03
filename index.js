@@ -8,7 +8,7 @@ const genConBtn = $('.control button');
 const run = $('#runInput');
 const reset = $('#reset');
 const speed = $('#speedInput');
-const step = $('.inputs .control .buttons-2');
+const step = $('#forward');
 
 // INPUTS
 const machineInput = $('#machineInput'); 
@@ -41,6 +41,11 @@ pseudoBtn.on('click', function() {
     inputFile.trigger('click');
 });
 inputFile.on('change', function() {
+    $('#readMachine').prop('disabled', false);
+    validation.css('visibility', 'hidden');
+    resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
+    genConBtn.prop('disabled', true);
+
     var fr = new FileReader();
     fr.onload = function(){
         machineInput.val(fr.result);
@@ -71,6 +76,7 @@ readMachine.on('click', function(){
 
 machineInput.on('input', function(){
     validation.css('visibility', 'hidden');
+    $('#readMachine').prop('disabled', false);
     resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
     genConBtn.prop('disabled', true);
 });
@@ -85,14 +91,15 @@ reset.on('click', function(){
     resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
 });
 
-step.on('click', function(e){
-    stepDPDA(inputString.val(), stringContainer, stateContainer, stackContainer, pointer, verdictContainer, e.target.id);
+step.on('click', function(){
+    stepDPDA(inputString.val(), stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
 });
 
 // UPDATING GUI
 inputString.on('input', function(){
     stringContainer.empty();
     stringContainer.append($('<span class="pointer"></span>'));
+    resetGUI(stringContainer, stateContainer, stackContainer, pointer, verdictContainer);
     for (let i = 0; i < inputString.val().length; i++) {
         stringContainer.append('<span>' + inputString.val()[i] + '</span>');
     }

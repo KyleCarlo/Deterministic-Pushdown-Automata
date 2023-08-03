@@ -17,8 +17,6 @@ var allTransitions = [];
 // GUI VARIABLES
 var step = 0;
 var verdict;
-var animate;
-var verdictAnimate;
 var spanWidth = 20;
 var iString = 0;
 
@@ -293,14 +291,17 @@ const dpdaReader = function(input, stackContainer, stateContainer){
 const runDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, speed){
     verdict = DPDA(inputString);
     var animationSpeed = 100 * (11-speed);
+    $('#readMachine').prop('disabled', true);
 
     stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');  
     stack = [initStackSymbol];
 
     $('#run').prop('disabled', true);
     $('#forward').prop('disabled', true);
+    $('#reset').prop('disabled', true);
+    $('#inputFileBtn').prop('disabled', true);
     for (let i = 0; i < allTransitions.length; i++) {
-        animate = setTimeout(function() {
+        setTimeout(function() {
             step++;
 
             // UPDATE STACK
@@ -321,12 +322,16 @@ const runDPDA = function(inputString, stringContainer, stateContainer, stackCont
                 pointer.css('border', 'solid 5px var(--orange)');
                 stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');      
                 iString++;         
+            } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
+                pointer.css('border', 'solid 5px transparent');
             }
         }, animationSpeed * i);
     }
-    verdictAnimate = setTimeout(function() {
+    setTimeout(function() {
         step--;
         $('#backward').prop('disabled', false);
+        $('#reset').prop('disabled', false);
+        $('#inputFileBtn').prop('disabled', false);
         if (verdict != null){
             if (verdict == 'accepted') 
                 accept(verdictContainer);
@@ -336,84 +341,46 @@ const runDPDA = function(inputString, stringContainer, stateContainer, stackCont
     }, animationSpeed * allTransitions.length);
 }
 
-const stepDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, direction){
-    if (allTransitions.length == 0) 
-        verdict = DPDA(inputString);
+const stepDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer){
+    verdict = DPDA(inputString);
 
+    $('#runInput').prop('disabled', true);
+    stack = [initStackSymbol];
     // FORWARD
-    if (direction == 'forward') {
-        if (step < allTransitions.length - 1)
-            step++;
-        $('#backward').prop('disabled', false);
-        // UPDATE STACK
-        stackContainer.empty();
-        for (let j = 0; j < allTransitions[step].stack.length; j++) {
-            stackContainer.append($('<span>').text(allTransitions[step].stack[j]));
-        }
-        if (stackContainer.children().length == 0) {
-            stackContainer.append($('<span>'));
-        }
+    if (step < allTransitions.length - 1)
+        step++;
+    $('#backward').prop('disabled', false);
 
-        // UPDATE STATE
-        stateContainer.text(allTransitions[step].state);
-
-        // UPDATE INPUT STRING
-        if (allTransitions[step].input != '' || iString == inputString.length) {
-            spanWidth += 39.6;
-            pointer.css('border', 'solid 5px var(--orange)');
-            stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
-            
-            iString++;         
-        } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
-            pointer.css('border', 'solid 5px transparent');
-        }
-
-        if (step == allTransitions.length - 1) {
-            if (verdict == 'accepted') 
-                accept(verdictContainer);
-            else if (verdict == 'rejected')
-                reject(verdictContainer);
-            $('#forward').prop('disabled', true);
-        }
+    // UPDATE STACK
+    stackContainer.empty();
+    for (let j = 0; j < allTransitions[step].stack.length; j++) {
+        stackContainer.append($('<span>').text(allTransitions[step].stack[j]));
+    }
+    if (stackContainer.children().length == 0) {
+        stackContainer.append($('<span>'));
     }
 
-    // BACKWARD
-    if (direction == 'backward') {
-        if (step > 0)
-            step--;
+    // UPDATE STATE
+    stateContainer.text(allTransitions[step].state);
 
-        // UPDATE STACK
-        stackContainer.empty();
-        for (let j = 0; j < allTransitions[step].stack.length; j++) {
-            stackContainer.append($('<span>').text(allTransitions[step].stack[j]));
-        }
-        if (stackContainer.children().length == 0) {
-            stackContainer.append($('<span>'));
-        }
-
-        // UPDATE STATE
-        stateContainer.text(allTransitions[step].state);
-
-        // UPDATE INPUT STRING
-        if (allTransitions[step].input != '' || iString == 1) {
-            spanWidth -= 39.6;
-            pointer.css('border', 'solid 5px var(--orange)');
-            stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
-            iString--;         
-        } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
-            pointer.css('border', 'solid 5px transparent');
-        }
-
-        if (step >= 0) {
-            verdictContainer.text('--');
-            verdictContainer.css('color', 'var(--blue)');
-            $('#forward').prop('disabled', false);
-        }
-
-        if (step == 0) {
-            $('#backward').prop('disabled', true);
-        }
+    // UPDATE INPUT STRING
+    if (allTransitions[step].input != '' || iString == inputString.length) {
+        spanWidth += 39.6;
+        pointer.css('border', 'solid 5px var(--orange)');
+        stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
+        iString++;         
+    } else if (inputString[iString-1] != undefined && inputString[iString+1] != undefined) {
+        pointer.css('border', 'solid 5px transparent');
     }
+
+    if (step == allTransitions.length - 1) {
+        if (verdict == 'accepted') 
+            accept(verdictContainer);
+        else if (verdict == 'rejected')
+            reject(verdictContainer);
+        $('#forward').prop('disabled', true);
+    }
+    
 };
 
 const resetGUI = function(stringContainer, stateContainer, stackContainer, pointer, verdictContainer){
@@ -427,8 +394,6 @@ const resetGUI = function(stringContainer, stateContainer, stackContainer, point
     verdictContainer.css('color', 'var(--blue)');
     stackContainer.empty();
     stackContainer.append($('<span>').text(initStackSymbol));
-    // clearTimeout(animate);
-    // clearTimeout(verdictAnimate);
     $('#forward').prop('disabled', false);
     $('#backward').prop('disabled', true);
     $('#runInput').prop('disabled', false);

@@ -1,0 +1,16 @@
+{
+  "name": "stalgcm",
+  "version": "1.0.0",
+  "description": "- The machine definition follows the format below by line\r     1. number of states\r     2. list of states\r     3. number of symbols in the input alphabet\r     4. input alphabet\r     5. number of symbols in the stack alphabet\r     6. stack alphabet\r     7. number of transitions\r     8. list of transitions in the format q s pop q’ push such that f(q,s,pop) = (q’,push)\r     - Note that for this simulation, only single-character inputs and single-character push/pop to the stack are accepted\r     - DPDA's formal definition is followed for other rules regarding transitions\r     9. start state\r     10. initial stack symbol\r     11. number of final states\r     12. list of final states",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run lite",
+    "lite" : "lite-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
