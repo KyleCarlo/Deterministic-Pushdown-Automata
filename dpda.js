@@ -64,7 +64,7 @@ function DPDA(inputString){
         let transitionFound = availableTransitions.find(transition => (transition.input === input || transition.input === '')
                                                         && (transition.pop === stack[stack.length-1] || transition.pop === ''));
         
-        if (transitionFound == undefined || i == inputString.length && finalStates.includes(currentState) && stack.length == 0) {
+        if (transitionFound == undefined || (i == inputString.length && finalStates.includes(currentState))) {
             loop = false;
         } else {
             if(transitionFound.input !== '')
@@ -85,7 +85,7 @@ function DPDA(inputString){
         }
     }
 
-    if(i == inputString.length && finalStates.includes(currentState) && stack.length == 0)
+    if(i == inputString.length && finalStates.includes(currentState))
         return 'accepted';
     else
         return 'rejected';
@@ -288,11 +288,12 @@ const dpdaReader = function(input, stackContainer, stateContainer){
     stateContainer.text(startState);
 }
 
-const runDPDA = function(inputString, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, speed){
+const runDPDA = function(inputString, inputStringContainer, stringContainer, stateContainer, stackContainer, pointer, verdictContainer, speed){
     verdict = DPDA(inputString);
     var animationSpeed = 100 * (11-speed);
     $('#readMachine').prop('disabled', true);
 
+    inputStringContainer.prop('disabled', true);
     stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');  
     stack = [initStackSymbol];
 
@@ -318,7 +319,7 @@ const runDPDA = function(inputString, stringContainer, stateContainer, stackCont
             
             // UPDATE INPUT STRING
             if (allTransitions[i].input != '' || iString == inputString.length) {
-                spanWidth += 39.6;
+                spanWidth += $('.gui .string .pointer').outerWidth();
                 pointer.css('border', 'solid 5px var(--orange)');
                 stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');      
                 iString++;         
@@ -329,6 +330,7 @@ const runDPDA = function(inputString, stringContainer, stateContainer, stackCont
     }
     setTimeout(function() {
         step--;
+        inputStringContainer.prop('disabled', false);
         $('#backward').prop('disabled', false);
         $('#reset').prop('disabled', false);
         $('#inputFileBtn').prop('disabled', false);
@@ -365,7 +367,7 @@ const stepDPDA = function(inputString, stringContainer, stateContainer, stackCon
 
     // UPDATE INPUT STRING
     if (allTransitions[step].input != '' || iString == inputString.length) {
-        spanWidth += 39.6;
+        spanWidth += $('.gui .string .pointer').outerWidth();
         pointer.css('border', 'solid 5px var(--orange)');
         stringContainer.css('transform', 'translateX(calc(50% + ('+ (-spanWidth)+'px)))');   
         iString++;         
@@ -383,7 +385,7 @@ const stepDPDA = function(inputString, stringContainer, stateContainer, stackCon
     
 };
 
-const resetGUI = function(stringContainer, stateContainer, stackContainer, pointer, verdictContainer){
+const resetGUI = function(stringContainer, stateContainer, stackContainer, pointer, verdictContainer, isMachineExist){
     spanWidth = 20;
     iString = 0;
     step = 0;
@@ -394,9 +396,11 @@ const resetGUI = function(stringContainer, stateContainer, stackContainer, point
     verdictContainer.css('color', 'var(--blue)');
     stackContainer.empty();
     stackContainer.append($('<span>').text(initStackSymbol));
-    $('#forward').prop('disabled', false);
-    $('#backward').prop('disabled', true);
-    $('#runInput').prop('disabled', false);
+    if (isMachineExist){
+        $('#forward').prop('disabled', false);
+        $('#backward').prop('disabled', true);
+        $('#runInput').prop('disabled', false);
+    }
 }
 
 export {dpdaReader, runDPDA, stepDPDA, resetGUI};

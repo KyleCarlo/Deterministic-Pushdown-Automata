@@ -15,8 +15,8 @@
 
 body{
     display: flex;
-    flex-direction: column;
     justify-content: center;
+    flex-direction: column;
     background-color: var(--primary-color);
     font-family: var(--def-font);
     color: var(--secondary-color);
@@ -150,8 +150,10 @@ button:disabled{
 }
 
 .gui .string *, .gui .stack *{
-    width: 20px;
-    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px;
+    max-height: 20px;
     font-weight: bold;
     border: solid 5px var(--blue);
     padding: 5px;
