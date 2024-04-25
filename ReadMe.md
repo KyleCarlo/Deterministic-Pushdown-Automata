@@ -2,7 +2,7 @@
 - The objective of this project is to implement a simulation of a Deterministic Pushdown Automaton (DPDA) and provide a minimalist Graphical User Interface (GUI) for interacting with the simulation. The DPDA will serve as an abstract machine capable of accepting or rejecting input strings. This project serves as a requirement in the subject Advanced Algorithms and Complexity (STALGCM) in De La Salle University.
 # Project Setup
 ### Online Setup
-- Accessible in the link: https://kylecarlo.github.io/STALGCM/
+- Accessible in the link: https://kylecarlo.github.io/Deterministic-Pushdown-Automata/
 ### Local Setup
 1. Download the project from the repository.
 2. Open a terminal.
